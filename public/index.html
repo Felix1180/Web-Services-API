@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Analysis</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #fff;
+        padding: 20px 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 400px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        word-wrap: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Text Analysis</h1>
+
+      <!-- Text Input -->
+      <label for="textInput">Enter text to analyze:</label>
+      <input type="text" id="textInput" placeholder="Type some text here..." />
+
+      <!-- File Upload -->
+      <label for="fileInput">Or upload a text file:</label>
+      <input type="file" id="fileInput" accept=".txt" />
+
+      <!-- Submit Button -->
+      <button id="analyzeBtn">Analyze</button>
+
+      <!-- Result Display -->
+      <div class="result" id="result">
+        <strong>Result will be displayed here...</strong>
+      </div>
+    </div>
+
+    <script>
+      const analyzeButton = document.getElementById("analyzeBtn");
+      const textInput = document.getElementById("textInput");
+      const fileInput = document.getElementById("fileInput");
+      const resultDiv = document.getElementById("result");
+
+      analyzeButton.addEventListener("click", () => {
+        let text = textInput.value;
+
+        // Check if a file was uploaded
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+
+          reader.onload = function (event) {
+            text = event.target.result;
+            sendDataToServer(text);
+          };
+
+          reader.readAsText(file);
+        } else if (text.trim() !== "") {
+          sendDataToServer(text);
+        } else {
+          alert("Please enter text or upload a file.");
+        }
+      });
+
+      function sendDataToServer(text) {
+        fetch("http://localhost:3000/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ text }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Response from server:", data);
+            displayResult(data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            resultDiv.innerHTML = `<strong>Error occurred while processing.</strong>`;
+          });
+      }
+
+      function displayResult(data) {
+        resultDiv.innerHTML = `
+                <h3>Analysis Result</h3>
+                <p><strong>Sentiment:</strong> ${data.sentiment}</p>
+                <p><strong>Word Count:</strong> ${data.word_count}</p>
+                <p><strong>Character Count:</strong> ${data.char_count}</p>
+                <p><strong>Text without Stopwords:</strong> ${data.text_no_stopwords}</p>
+            `;
+      }
+    </script>
+  </body>
+</html>
