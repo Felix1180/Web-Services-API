@@ -28,6 +28,7 @@ dependencies:
   - aeson # Untuk JSON encoding/decoding
   - bytestring # Untuk string handling
   - mtl # Untuk monad transformer
+  - wai-cors
 
 ghc-options:
   - -Wall
